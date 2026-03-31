@@ -1,1 +1,1287 @@
-placeholder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YLD Growth System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --text: #e8e4dc;
+    --text-muted: #6b6b6b;
+    --text-dim: #9a9a9a;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200, 169, 110, 0.15);
+    --red: #c0392b;
+    --red-dim: rgba(192, 57, 43, 0.15);
+    --amber: #d4900a;
+    --amber-dim: rgba(212, 144, 10, 0.15);
+    --green: #27734a;
+    --green-dim: rgba(39, 115, 74, 0.15);
+    --radius: 4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Layout */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 32px 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-section {
+    padding: 16px 0;
+    flex: 1;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 24px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--accent-dim);
+    border-left-color: var(--accent);
+    color: var(--text);
+  }
+
+  .nav-num {
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 16px;
+    flex-shrink: 0;
+  }
+
+  .nav-rag {
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-light);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .nav-rag.red { background: var(--red); }
+  .nav-rag.amber { background: var(--amber); }
+  .nav-rag.green { background: var(--green); }
+
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border-light);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Main content */
+  .main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Overview panel */
+  .panel {
+    display: none;
+    padding: 56px 64px;
+    max-width: 900px;
+  }
+
+  .panel.active { display: block; }
+
+  /* Overview */
+  .overview-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .overview-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .overview-lead {
+    font-size: 17px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .how-to-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .how-to-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .how-to-item strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .how-to-item p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Maturity legend */
+  .rag-legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .rag-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .rag-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .rag-dot.red { background: var(--red); }
+  .rag-dot.amber { background: var(--amber); }
+  .rag-dot.green { background: var(--green); }
+
+  /* Dimension grid on overview */
+  .dimension-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .dimension-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .dimension-card:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .dimension-card-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  .dimension-card-body { flex: 1; }
+
+  .dimension-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .dimension-card-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .dimension-card-rag {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-light);
+    flex-shrink: 0;
+    margin-top: 4px;
+    transition: background 0.2s;
+  }
+
+  .dimension-card-rag.red { background: var(--red); }
+  .dimension-card-rag.amber { background: var(--amber); }
+  .dimension-card-rag.green { background: var(--green); }
+
+  /* Dimension panel */
+  .dim-header {
+    margin-bottom: 40px;
+  }
+
+  .dim-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .dim-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .dim-desc {
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* Info blocks */
+  .info-block {
+    margin-bottom: 28px;
+  }
+
+  .info-block-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .info-block-text {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .dot-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dot-list li {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .dot-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Input section */
+  .input-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-top: 40px;
+  }
+
+  .input-section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Name field */
+  .field {
+    margin-bottom: 24px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    transition: border-color 0.15s;
+    outline: none;
+    resize: vertical;
+  }
+
+  .field input:focus, .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .field textarea { min-height: 100px; }
+
+  /* RAG selector */
+  .rag-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .rag-btn {
+    flex: 1;
+    padding: 14px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .rag-btn:hover { border-color: var(--border-light); color: var(--text); }
+
+  .rag-btn .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .rag-btn.red-btn .dot { background: var(--red); }
+  .rag-btn.amber-btn .dot { background: var(--amber); }
+  .rag-btn.green-btn .dot { background: var(--green); }
+
+  .rag-btn.red-btn.selected {
+    background: var(--red-dim);
+    border-color: var(--red);
+    color: var(--text);
+  }
+
+  .rag-btn.amber-btn.selected {
+    background: var(--amber-dim);
+    border-color: var(--amber);
+    color: var(--text);
+  }
+
+  .rag-btn.green-btn.selected {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--text);
+  }
+
+  /* Submit */
+  .submit-btn {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    letter-spacing: 0.02em;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .submitted-note {
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* Responses */
+  .responses-section {
+    margin-top: 40px;
+  }
+
+  .responses-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .responses-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .responses-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .response-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 10px;
+  }
+
+  .response-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .response-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .response-rag-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 400;
+  }
+
+  .response-rag-badge.red {
+    background: var(--red-dim);
+    color: #e57368;
+    border: 1px solid rgba(192,57,43,0.3);
+  }
+
+  .response-rag-badge.amber {
+    background: var(--amber-dim);
+    color: #d4a843;
+    border: 1px solid rgba(212,144,10,0.3);
+  }
+
+  .response-rag-badge.green {
+    background: var(--green-dim);
+    color: #4caf78;
+    border: 1px solid rgba(39,115,74,0.3);
+  }
+
+  .response-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .response-text {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* Navigation buttons */
+  .dim-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border-light);
+    color: var(--text-dim);
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .dim-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Results panel */
+  .results-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .result-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .result-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .result-stat-num.red { color: #e57368; }
+  .result-stat-num.amber { color: #d4a843; }
+  .result-stat-num.green { color: #4caf78; }
+
+  .result-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .result-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .result-row:hover { border-color: var(--border-light); }
+
+  .result-row-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .result-row-name {
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .result-row-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .result-row-rag {
+    display: flex;
+    gap: 4px;
+  }
+
+  .mini-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .mini-dot.red { background: var(--red); }
+  .mini-dot.amber { background: var(--amber); }
+  .mini-dot.green { background: var(--green); }
+  .mini-dot.none { background: var(--border-light); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { position: relative; height: auto; }
+    .panel { padding: 32px 24px; }
+    .how-to-grid, .dimension-grid { grid-template-columns: 1fr; }
+    .results-summary { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">YLD</div>
+      <div class="sidebar-subtitle">Growth System</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active" onclick="showPanel('overview')">
+        <span class="nav-num"></span>
+        Overview
+      </div>
+      <div id="nav-results" class="nav-item" onclick="showPanel('results')">
+        <span class="nav-num"></span>
+        All Responses
+      </div>
+      <div style="height:1px;background:var(--border);margin:8px 0;"></div>
+      <div class="nav-label" style="margin-top:8px;">Dimensions</div>
+    </div>
+    <div id="sidebar-dims"></div>
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>Responses submitted</span>
+        <span id="progress-count">0 / 10</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Overview -->
+    <div id="panel-overview" class="panel active">
+      <div class="overview-eyebrow">Working Framework</div>
+      <h1 class="overview-title">YLD Growth System</h1>
+      <p class="overview-lead">Growth is not one activity. It is the system that connects how we understand the market, how we win work, and how we deliver impact for clients. This is a working view of that system - built to start a conversation, not to prescribe an answer.</p>
+
+      <div class="divider"></div>
+
+      <div class="section-label">How to use this</div>
+      <div class="how-to-grid">
+        <div class="how-to-item">
+          <strong>Before the session</strong>
+          <p>Read through each dimension, form a view, and submit your rating and rationale. This is your individual perspective - there are no right answers.</p>
+        </div>
+        <div class="how-to-item">
+          <strong>In the session</strong>
+          <p>We will work through each dimension together. Where views differ, that is the most useful part of the conversation.</p>
+        </div>
+        <div class="how-to-item">
+          <strong>The rating</strong>
+          <p>Each dimension gets one of three maturity ratings. Be honest - the goal is a shared, accurate picture, not all greens.</p>
+        </div>
+        <div class="how-to-item">
+          <strong>The rationale</strong>
+          <p>A sentence or two explaining your rating is enough. What do we have today? What feels inconsistent or unclear?</p>
+        </div>
+      </div>
+
+      <div class="section-label">Maturity ratings</div>
+      <div class="rag-legend">
+        <div class="rag-item"><div class="rag-dot red"></div>Not yet in place</div>
+        <div class="rag-item"><div class="rag-dot amber"></div>In place but inconsistent</div>
+        <div class="rag-item"><div class="rag-dot green"></div>Consistently executed</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">The ten dimensions</div>
+      <div class="dimension-grid" id="overview-grid"></div>
+    </div>
+
+    <!-- Results panel -->
+    <div id="panel-results" class="panel">
+      <div class="overview-eyebrow">Collective View</div>
+      <h2 class="dim-title">All Responses</h2>
+      <p class="dim-desc" style="margin-bottom:40px;">An overview of all input submitted across the ten dimensions. Use this to identify where views converge and where they differ before the facilitated session.</p>
+
+      <div class="results-summary">
+        <div class="result-stat">
+          <div class="result-stat-num red" id="stat-red">0</div>
+          <div class="result-stat-label">Not yet in place</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-num amber" id="stat-amber">0</div>
+          <div class="result-stat-label">In place but inconsistent</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-num green" id="stat-green">0</div>
+          <div class="result-stat-label">Consistently executed</div>
+        </div>
+      </div>
+
+      <div id="results-list"></div>
+    </div>
+
+    <!-- Dimension panels generated by JS -->
+    <div id="dim-panels"></div>
+  </main>
+</div>
+
+<script>
+const DIMENSIONS = [
+  {
+    id: 1,
+    title: "Market Insight",
+    desc: "How well we understand the market we operate in - the sectors we target, the problems our clients are trying to solve, and how demand is shifting.",
+    why: "Without a clear and current view of the market, positioning becomes generic, outreach becomes scattergun, and we end up reacting to opportunities rather than shaping them. For a business growing beyond referrals, market insight is what allows us to be deliberate about where we focus.",
+    dot: [
+      "A clear, agreed view on which sectors and client types represent the best opportunity for YLD - not sector-agnostic by default, but intentional about where we concentrate effort",
+      "Strong understanding of the problems our target clients are trying to solve right now, including how AI is changing what they need from partners like us",
+      "Insight that is regularly refreshed - not a one-off exercise - and shared across the leadership team so that sales, delivery, and marketing are working from the same picture",
+      "Someone with clear ownership of maintaining and evolving this view"
+    ]
+  },
+  {
+    id: 2,
+    title: "Positioning",
+    desc: "How clearly and consistently we articulate what YLD does, who we help, and why it matters - in a way that is easy to understand and genuinely differentiated.",
+    why: "If our positioning is unclear or inconsistent, it creates friction at every stage of the growth system. Prospects do not immediately understand why YLD is the right choice. Sales conversations take longer. Marketing content lacks a clear point of view. And internally, people describe what we do in different ways - which makes it harder to build momentum as a team.",
+    dot: [
+      "A simple, confident articulation of YLD's value that does not require explanation - clear on who we help, what we do, and what makes us different",
+      "Differentiation that is genuine and specific - grounded in our combination of engineering depth, design capability, and production AI credibility - rather than generic consulting language",
+      "Consistent across every touchpoint: website, sales conversations, proposals, and how the team talks about YLD informally",
+      "Positioning that is owned and understood by the whole leadership team, not just the people closest to marketing"
+    ]
+  },
+  {
+    id: 3,
+    title: "Visibility and Profile",
+    desc: "How we show up in the market - the awareness and credibility we build with target clients and the broader community over time.",
+    why: "YLD has built a strong reputation, but reputation that lives in networks and word of mouth is fragile as a growth mechanism. Visibility that is more intentional and more consistent - through content, events, thought leadership, and community presence - creates a more reliable inbound flow and makes outbound conversations easier to open.",
+    dot: [
+      "A consistent presence in the markets and communities where our target clients are - not just occasional spikes of activity",
+      "Visible expertise through content and events that reflects what we genuinely know, rather than generic industry commentary",
+      "YLD's brand and its people visible in a way that reinforces each other - the firm's reputation and the individuals within it building together",
+      "Clear alignment between what we are known for and who we are trying to reach",
+      "A deliberate approach to awards and external recognition - industry awards and analyst validation have a long lead time but show up directly in due diligence, and the groundwork needs to start well ahead of any capital event"
+    ]
+  },
+  {
+    id: 4,
+    title: "Demand Generation",
+    desc: "How we create interest and opportunities with target clients - both through inbound activity that brings people to us and outbound activity that opens new conversations.",
+    why: "YLD has grown primarily through inbound referrals, which speaks well of the quality of our work. But a growth system that depends almost entirely on existing relationships and word of mouth is concentrated and fragile. As we look to grow further and reduce client concentration risk, we need more reliable and more proactive ways of generating demand.",
+    dot: [
+      "A balanced approach that combines inbound and outbound activity - not replacing what has worked, but building alongside it",
+      "Marketing activity that has a clear line of sight to pipeline - content and events that are designed to create conversations, not just awareness",
+      "Repeatable outbound approaches that feel like YLD - specific, expert, and credible - rather than generic prospecting",
+      "Clear ownership of demand generation activity and a shared understanding of what we are doing and why",
+      "A website and digital presence built to generate pipeline, not just communicate who we are - with clear calls to action, content that earns attention, and enough tracking in place to understand what is working"
+    ]
+  },
+  {
+    id: 5,
+    title: "Pipeline and Sales Discipline",
+    desc: "How we manage opportunities from first contact through to conversion - including how we qualify opportunities, make bid decisions, and actively manage pipeline health.",
+    why: "Without a clear and consistently followed approach to pipeline management, it is difficult to forecast accurately, make good decisions about where to invest sales effort, or understand why we win and lose. As we build a more proactive growth engine, pipeline discipline becomes increasingly important - both for commercial performance and for the confidence of any future acquirer or investor.",
+    dot: [
+      "Clear pipeline stages with agreed definitions that everyone works to consistently",
+      "A shared approach to qualifying opportunities - so we are deliberate about which bids we pursue and which we do not",
+      "Active, visible management of pipeline health - conversion rates, deal velocity, and where things are stalling",
+      "A regular rhythm for reviewing pipeline as a leadership team, not just tracking it individually"
+    ]
+  },
+  {
+    id: 6,
+    title: "Commercials and Pricing",
+    desc: "How we price and structure engagements - including how we approach value-based pricing, deal governance, and maintaining healthy margins.",
+    why: "Pricing decisions made individually and inconsistently erode margin and make it harder to understand the true commercial performance of the business. A more consistent commercial approach - one that reflects the value we deliver rather than just the effort we put in - improves profitability, creates more predictable outcomes, and is a meaningful signal of maturity to any acquirer.",
+    dot: [
+      "Pricing that reflects the value we create for clients, not just the cost of delivery - with an understanding of where we can command premium rates and why",
+      "A consistent approach to deal structure and margin that does not rely on individual judgement in every situation",
+      "Clear governance on commercial decisions - particularly for larger or more complex engagements - so that the right people are involved at the right moments",
+      "Awareness across the leadership team of what our commercial benchmarks are and how we are performing against them"
+    ]
+  },
+  {
+    id: 7,
+    title: "Delivery Excellence",
+    desc: "How consistently and reliably we deliver great work - including the methods, governance, and ways of working that underpin quality across engagements.",
+    why: "Delivery quality is the foundation everything else rests on. YLD's reputation has been built on the strength of its work, and that needs to be protected as we scale. Inconsistency in delivery - even with strong averages - creates client risk, reputational risk, and makes it harder to codify what makes YLD good in a way that survives growth and change.",
+    dot: [
+      "Strong, consistent delivery discipline that does not depend on heroics or individual brilliance - great outcomes that are repeatable across teams and engagements",
+      "Shared methods and ways of working that people can build on and adapt, rather than starting from scratch on each project",
+      "Clear governance that gives clients confidence and gives the leadership team visibility of how engagements are tracking",
+      "A clear link between delivery quality and commercial outcomes - knowing what great delivery leads to in terms of client expansion and advocacy",
+      "Core delivery methodologies, tools, and ways of working documented and reusable - so that what makes YLD good is codified and not dependent on specific individuals being in the room"
+    ]
+  },
+  {
+    id: 8,
+    title: "Client Impact",
+    desc: "The outcomes we create for clients and how well we capture, measure, and evidence the value we deliver.",
+    why: "Clients who can clearly articulate the value YLD delivered become advocates. Case studies and proof points that demonstrate real outcomes - not just activities - are what make our positioning credible in the market and make sales conversations easier to have. Without this, we are relying on trust and reputation rather than evidence.",
+    dot: [
+      "A clear definition of success established at the start of each engagement, so that impact can be measured rather than asserted",
+      "Consistent capture of outcomes through delivery - so that we can build a strong evidence base over time",
+      "Case studies and proof points that are specific, credible, and reflect the full range of what YLD does - engineering depth, design quality, and AI capability",
+      "A process for turning good delivery into marketable evidence, rather than leaving it to chance"
+    ]
+  },
+  {
+    id: 9,
+    title: "Client Satisfaction and Feedback",
+    desc: "How we systematically capture and act on client feedback throughout the lifecycle of an engagement - not just at the end, and not filtered through the people doing the delivery.",
+    why: "Without an independent view of how clients are feeling, problems surface too late and the picture that reaches leadership is incomplete. Delivery teams are invested in their relationships and naturally inclined to present a positive read. A structured feedback mechanism - owned independently of delivery - gives the business an honest signal on client health, allows issues to be addressed before they escalate, and builds the kind of trust that underpins long-term relationships.",
+    dot: [
+      "Regular, structured check-ins with clients at defined points in the engagement lifecycle - not just at the start and end, but at meaningful milestones in between",
+      "Feedback gathered by someone outside the delivery team, so clients feel genuinely able to be candid",
+      "A consistent set of questions that allows comparison over time and across clients, rather than ad hoc conversations that are hard to learn from",
+      "Feedback that is reviewed at leadership level and connected to delivery decisions - so it drives action, not just reporting",
+      "A clear owner for the client satisfaction process who is accountable for ensuring it happens and that findings are acted on"
+    ]
+  },
+  {
+    id: 10,
+    title: "Client Growth and Advocacy",
+    desc: "How we grow existing client relationships over time - deepening engagement, expanding into new areas, and turning satisfied clients into active advocates.",
+    why: "Existing clients are YLD's strongest commercial asset. Historically, the ability to expand and deepen within client accounts has been a real strength - long relationships, growing teams, and repeat work driven by quality and trust. The question worth exploring is how much of that is systematic versus relationship-dependent, and what it would take to make it more reliably repeatable as the portfolio grows.",
+    dot: [
+      "Active account management on key clients - not just delivering well, but maintaining a view of where the relationship can go next",
+      "A structured approach to identifying and pursuing expansion opportunities within existing accounts, rather than waiting for clients to ask",
+      "Strong client relationships that generate advocacy - referrals, references, and the kind of word-of-mouth that has driven YLD's growth to date",
+      "A clear bridge between great delivery and the next conversation - so that the end of one engagement is the beginning of the next"
+    ]
+  }
+];
+
+const STORAGE_KEY = 'yld-growth-responses-v2';
+
+function getResponses() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveResponse(dimId, name, rag, rationale) {
+  const responses = getResponses();
+  responses.push({ dimId, name, rag, rationale, time: new Date().toISOString() });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' +
+    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+function ragLabel(rag) {
+  if (rag === 'red') return 'Not yet in place';
+  if (rag === 'amber') return 'In place but inconsistent';
+  if (rag === 'green') return 'Consistently executed';
+  return '';
+}
+
+function buildSidebar() {
+  const container = document.getElementById('sidebar-dims');
+  DIMENSIONS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.id = `nav-dim-${d.id}`;
+    el.onclick = () => showDim(d.id);
+    el.innerHTML = `<span class="nav-num">${d.id}</span>${d.title}<span class="nav-rag" id="nav-rag-${d.id}"></span>`;
+    container.appendChild(el);
+  });
+}
+
+function buildOverviewGrid() {
+  const grid = document.getElementById('overview-grid');
+  DIMENSIONS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'dimension-card';
+    el.onclick = () => showDim(d.id);
+    el.innerHTML = `
+      <div class="dimension-card-num">${d.id}</div>
+      <div class="dimension-card-body">
+        <div class="dimension-card-title">${d.title}</div>
+        <div class="dimension-card-desc">${d.desc.substring(0, 80)}...</div>
+      </div>
+      <div class="dimension-card-rag" id="card-rag-${d.id}"></div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function buildDimPanels() {
+  const container = document.getElementById('dim-panels');
+  DIMENSIONS.forEach((d, idx) => {
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+    panel.id = `panel-dim-${d.id}`;
+
+    const dotItems = d.dot.map(item => `<li>${item}</li>`).join('');
+    const isFirst = idx === 0;
+    const isLast = idx === DIMENSIONS.length - 1;
+
+    panel.innerHTML = `
+      <div class="dim-header">
+        <div class="dim-eyebrow">Dimension ${d.id} of ${DIMENSIONS.length}</div>
+        <h2 class="dim-title">${d.title}</h2>
+        <p class="dim-desc">${d.desc}</p>
+      </div>
+
+      <div class="info-block">
+        <div class="info-block-label">Why this matters</div>
+        <p class="info-block-text">${d.why}</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="info-block">
+        <div class="info-block-label">Direction of travel</div>
+        <ul class="dot-list">${dotItems}</ul>
+      </div>
+
+      <div class="input-section">
+        <div class="input-section-title">Your input</div>
+
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="name-${d.id}" placeholder="Enter your name" />
+        </div>
+
+        <div class="field">
+          <label>Maturity rating</label>
+          <div class="rag-selector">
+            <button class="rag-btn red-btn" onclick="selectRag(${d.id}, 'red', this)">
+              <span class="dot"></span> Not yet in place
+            </button>
+            <button class="rag-btn amber-btn" onclick="selectRag(${d.id}, 'amber', this)">
+              <span class="dot"></span> In place but inconsistent
+            </button>
+            <button class="rag-btn green-btn" onclick="selectRag(${d.id}, 'green', this)">
+              <span class="dot"></span> Consistently executed
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Rationale - what do we have today, and what feels inconsistent or unclear?</label>
+          <textarea id="rationale-${d.id}" placeholder="A sentence or two is enough..."></textarea>
+        </div>
+
+        <button class="submit-btn" onclick="submitResponse(${d.id})" id="submit-${d.id}">Submit response</button>
+        <div class="submitted-note" id="submitted-note-${d.id}">Response submitted. Thank you.</div>
+      </div>
+
+      <div class="responses-section">
+        <div class="responses-header">
+          <div class="responses-title">Responses so far</div>
+          <div class="responses-count" id="resp-count-${d.id}">0 responses</div>
+        </div>
+        <div id="responses-${d.id}"></div>
+      </div>
+
+      <div class="dim-nav">
+        <button class="nav-btn" onclick="showDim(${d.id - 1})" ${isFirst ? 'disabled' : ''}>
+          &larr; Previous
+        </button>
+        <span class="dim-counter">${d.id} / ${DIMENSIONS.length}</span>
+        <button class="nav-btn" onclick="${isLast ? "showPanel('results')" : `showDim(${d.id + 1})`}">
+          ${isLast ? 'View all responses' : 'Next'} &rarr;
+        </button>
+      </div>
+    `;
+
+    container.appendChild(panel);
+  });
+}
+
+let selectedRags = {};
+
+function selectRag(dimId, rag, btn) {
+  selectedRags[dimId] = rag;
+  const selector = btn.closest('.rag-selector');
+  selector.querySelectorAll('.rag-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function submitResponse(dimId) {
+  const name = document.getElementById(`name-${dimId}`).value.trim();
+  const rag = selectedRags[dimId];
+  const rationale = document.getElementById(`rationale-${dimId}`).value.trim();
+
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!rag) { alert('Please select a maturity rating.'); return; }
+
+  saveResponse(dimId, name, rag, rationale);
+
+  document.getElementById(`submit-${dimId}`).disabled = true;
+  document.getElementById(`submitted-note-${dimId}`).style.display = 'block';
+
+  refreshResponses(dimId);
+  updateProgress();
+  updateRagIndicators();
+}
+
+function refreshResponses(dimId) {
+  const responses = getResponses().filter(r => r.dimId === dimId);
+  const container = document.getElementById(`responses-${dimId}`);
+  const countEl = document.getElementById(`resp-count-${dimId}`);
+
+  countEl.textContent = `${responses.length} ${responses.length === 1 ? 'response' : 'responses'}`;
+
+  if (responses.length === 0) {
+    container.innerHTML = '<div class="empty">No responses yet. Be the first to submit your view.</div>';
+    return;
+  }
+
+  container.innerHTML = responses.map(r => `
+    <div class="response-card">
+      <div class="response-meta">
+        <span class="response-name">${escHtml(r.name)}</span>
+        <span class="response-rag-badge ${r.rag}">${ragLabel(r.rag)}</span>
+        <span class="response-time">${formatTime(r.time)}</span>
+      </div>
+      ${r.rationale ? `<div class="response-text">${escHtml(r.rationale)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function refreshAllResponses() {
+  DIMENSIONS.forEach(d => refreshResponses(d.id));
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateProgress() {
+  const responses = getResponses();
+  const submitted = new Set(responses.map(r => r.dimId)).size;
+  document.getElementById('progress-count').textContent = `${submitted} / ${DIMENSIONS.length}`;
+  document.getElementById('progress-fill').style.width = `${(submitted / DIMENSIONS.length) * 100}%`;
+}
+
+function updateRagIndicators() {
+  const responses = getResponses();
+  DIMENSIONS.forEach(d => {
+    const dimResponses = responses.filter(r => r.dimId === d.id);
+    const navEl = document.getElementById(`nav-rag-${d.id}`);
+    const cardEl = document.getElementById(`card-rag-${d.id}`);
+    if (dimResponses.length > 0) {
+      const last = dimResponses[dimResponses.length - 1].rag;
+      [navEl, cardEl].forEach(el => { if (el) { el.className = `nav-rag ${last}`; } });
+    }
+  });
+}
+
+function buildResultsPanel() {
+  const responses = getResponses();
+  const statRed = responses.filter(r => r.rag === 'red').length;
+  const statAmber = responses.filter(r => r.rag === 'amber').length;
+  const statGreen = responses.filter(r => r.rag === 'green').length;
+
+  document.getElementById('stat-red').textContent = statRed;
+  document.getElementById('stat-amber').textContent = statAmber;
+  document.getElementById('stat-green').textContent = statGreen;
+
+  const list = document.getElementById('results-list');
+  if (responses.length === 0) {
+    list.innerHTML = '<div class="empty">No responses submitted yet. Responses will appear here as people submit their input.</div>';
+    return;
+  }
+
+  list.innerHTML = DIMENSIONS.map(d => {
+    const dimR = responses.filter(r => r.dimId === d.id);
+    const dots = dimR.map(r => `<div class="mini-dot ${r.rag}"></div>`).join('');
+    return `
+      <div class="result-row" onclick="showDim(${d.id})">
+        <span class="result-row-num">${d.id}</span>
+        <span class="result-row-name">${d.title}</span>
+        <span class="result-row-count">${dimR.length} ${dimR.length === 1 ? 'response' : 'responses'}</span>
+        <div class="result-row-rag">${dots || '<div class="mini-dot none"></div>'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Panel navigation
+let currentPanel = 'overview';
+
+function showPanel(panelId) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById(`panel-${panelId}`).classList.add('active');
+
+  const navEl = document.getElementById(`nav-${panelId}`);
+  if (navEl) navEl.classList.add('active');
+
+  if (panelId === 'results') buildResultsPanel();
+  currentPanel = panelId;
+  window.scrollTo(0, 0);
+}
+
+function showDim(dimId) {
+  if (dimId < 1 || dimId > DIMENSIONS.length) return;
+  showPanel(`dim-${dimId}`);
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById(`nav-dim-${dimId}`);
+  if (navEl) navEl.classList.add('active');
+
+  refreshResponses(dimId);
+}
+
+// Init
+buildSidebar();
+buildOverviewGrid();
+buildDimPanels();
+refreshAllResponses();
+updateProgress();
+updateRagIndicators();
+</script>
+</body>
+</html>
