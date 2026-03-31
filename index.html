@@ -7,22 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #090329;
-    --surface: #0f082a;
-    --surface2: #160d35;
-    --border: #1e1550;
-    --border-light: #2a1d60;
-    --text: #FFFFFF;
-    --text-muted: #B5B3BF;
-    --text-dim: #d4d0e0;
-    --accent: #A533FF;
-    --accent-dim: rgba(165, 51, 255, 0.15);
+    --bg: #f8f8f6;
+    --surface: #ffffff;
+    --surface2: #f0eff8;
+    --border: #e2e0ed;
+    --border-light: #d0cde8;
+    --text: #1a1a2e;
+    --text-muted: #7a7890;
+    --text-dim: #4a4860;
+    --accent: #7B2FE0;
+    --accent-dim: rgba(123, 47, 224, 0.1);
     --red: #c0392b;
-    --red-dim: rgba(192, 57, 43, 0.15);
-    --amber: #d4900a;
-    --amber-dim: rgba(212, 144, 10, 0.15);
-    --green: #00c47d;
-    --green-dim: rgba(0, 196, 125, 0.15);
+    --red-dim: rgba(192, 57, 43, 0.1);
+    --amber: #b87000;
+    --amber-dim: rgba(184, 112, 0, 0.1);
+    --green: #1a8a4a;
+    --green-dim: rgba(26, 138, 74, 0.1);
     --radius: 4px;
   }
 
@@ -32,9 +32,10 @@
     background: var(--bg);
     color: var(--text);
     font-family: 'Roboto', sans-serif;
-    font-weight: 300;
+    font-weight: 400;
     min-height: 100vh;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 16px;
   }
 
   /* Layout */
@@ -46,7 +47,7 @@
 
   /* Sidebar */
   .sidebar {
-    background: var(--surface);
+    background: #f0eff8;
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -193,7 +194,7 @@
   }
 
   .overview-lead {
-    font-size: 17px;
+    font-size: 18px;
     color: var(--text-dim);
     line-height: 1.7;
     max-width: 640px;
@@ -352,7 +353,7 @@
   }
 
   .dim-desc {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-dim);
     line-height: 1.7;
     max-width: 600px;
@@ -372,7 +373,7 @@
   }
 
   .info-block-text {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-dim);
     line-height: 1.7;
   }
@@ -385,7 +386,7 @@
   }
 
   .dot-list li {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-dim);
     line-height: 1.6;
     padding-left: 16px;
@@ -442,7 +443,7 @@
     padding: 12px 16px;
     color: var(--text);
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 300;
     transition: border-color 0.15s;
     outline: none;
@@ -515,7 +516,7 @@
   /* Submit */
   .submit-btn {
     background: var(--accent);
-    color: #FFFFFF;
+    color: #ffffff;
     border: none;
     border-radius: var(--radius);
     padding: 13px 28px;
@@ -577,7 +578,7 @@
   }
 
   .response-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text);
   }
@@ -614,7 +615,7 @@
   }
 
   .response-text {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-dim);
     line-height: 1.6;
   }
