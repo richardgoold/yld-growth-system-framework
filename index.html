@@ -997,17 +997,31 @@ const DIMENSIONS = [
   }
 ];
 
-const STORAGE_KEY = 'yld-growth-responses-v2';
+const SUPABASE_URL = 'https://crxqjnhfjvrmceefzhcu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyeHFqbmhmanZybWNlZWZ6aGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NTMzNTYsImV4cCI6MjA5MDUyOTM1Nn0.iLbEJ8_GMlZimpvI6vRyxFmE7l7joi_bE_8hj819huQ';
 
-function getResponses() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+async function getResponses() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/responses?select=*&order=created_at.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch { return []; }
 }
 
-function saveResponse(dimId, name, rag, rationale) {
-  const responses = getResponses();
-  responses.push({ dimId, name, rag, rationale, time: new Date().toISOString() });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+async function saveResponse(dimId, name, rag, rationale) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/responses`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ dim_id: parseInt(dimId), name, rag, rationale })
+  });
+  return res.ok;
 }
 
 function formatTime(iso) {
@@ -1147,103 +1161,93 @@ function selectRag(dimId, rag, btn) {
   btn.classList.add('selected');
 }
 
-function submitResponse(dimId) {
+async function submitResponse(dimId) {
   const name = document.getElementById(`name-${dimId}`).value.trim();
   const rag = selectedRags[dimId];
   const rationale = document.getElementById(`rationale-${dimId}`).value.trim();
-
   if (!name) { alert('Please enter your name.'); return; }
   if (!rag) { alert('Please select a maturity rating.'); return; }
-
-  saveResponse(dimId, name, rag, rationale);
-
-  document.getElementById(`submit-${dimId}`).disabled = true;
-  document.getElementById(`submitted-note-${dimId}`).style.display = 'block';
-
-  refreshResponses(dimId);
-  updateProgress();
-  updateRagIndicators();
+  const btn = document.getElementById(`submit-${dimId}`);
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  const ok = await saveResponse(dimId, name, rag, rationale);
+  if (ok) {
+    document.getElementById(`submitted-note-${dimId}`).style.display = 'block';
+    btn.textContent = 'Submitted';
+    const all = await getResponses();
+    DIMENSIONS.forEach(d => renderResponses(d.id, all));
+    updateProgressFrom(all);
+    updateRagFrom(all);
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Submit response';
+    alert('Something went wrong - please try again.');
+  }
 }
 
-function refreshResponses(dimId) {
-  const responses = getResponses().filter(r => r.dimId === dimId);
+function renderResponses(dimId, allResponses) {
+  const responses = allResponses.filter(r => (r.dim_id || r.dimId) === dimId);
   const container = document.getElementById(`responses-${dimId}`);
   const countEl = document.getElementById(`resp-count-${dimId}`);
-
+  if (!container || !countEl) return;
   countEl.textContent = `${responses.length} ${responses.length === 1 ? 'response' : 'responses'}`;
-
-  if (responses.length === 0) {
-    container.innerHTML = '<div class="empty">No responses yet. Be the first to submit your view.</div>';
-    return;
-  }
-
-  container.innerHTML = responses.map(r => `
-    <div class="response-card">
-      <div class="response-meta">
-        <span class="response-name">${escHtml(r.name)}</span>
-        <span class="response-rag-badge ${r.rag}">${ragLabel(r.rag)}</span>
-        <span class="response-time">${formatTime(r.time)}</span>
-      </div>
-      ${r.rationale ? `<div class="response-text">${escHtml(r.rationale)}</div>` : ''}
-    </div>
-  `).join('');
+  if (!responses.length) { container.innerHTML = '<div class="empty">No responses yet. Be the first to submit your view.</div>'; return; }
+  container.innerHTML = responses.map(r => `<div class="response-card"><div class="response-meta"><span class="response-name">${escHtml(r.name)}</span><span class="response-rag-badge ${r.rag}">${ragLabel(r.rag)}</span><span class="response-time">${formatTime(r.created_at || r.time)}</span></div>${r.rationale ? `<div class="response-text">${escHtml(r.rationale)}</div>` : ''}</div>`).join('');
 }
 
-function refreshAllResponses() {
-  DIMENSIONS.forEach(d => refreshResponses(d.id));
+function updateProgressFrom(responses) {
+  const submitted = new Set(responses.map(r => r.dim_id || r.dimId)).size;
+  document.getElementById('progress-count').textContent = `${submitted} / ${DIMENSIONS.length}`;
+  document.getElementById('progress-fill').style.width = `${(submitted / DIMENSIONS.length) * 100}%`;
+}
+
+function updateRagFrom(responses) {
+  DIMENSIONS.forEach(d => {
+    const dimR = responses.filter(r => (r.dim_id || r.dimId) === d.id);
+    if (dimR.length) {
+      const last = dimR[dimR.length - 1].rag;
+      ['nav-rag-', 'card-rag-'].forEach(p => { const el = document.getElementById(p + d.id); if (el) el.className = (p === 'nav-rag-' ? 'nav-rag ' : 'dimension-card-rag ') + last; });
+    }
+  });
+}
+
+async function refreshResponses(dimId) {
+  const all = await getResponses();
+  renderResponses(dimId, all);
+}
+
+async function refreshAllResponses() {
+  const all = await getResponses();
+  DIMENSIONS.forEach(d => renderResponses(d.id, all));
+  updateProgressFrom(all);
+  updateRagFrom(all);
 }
 
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function updateProgress() {
-  const responses = getResponses();
-  const submitted = new Set(responses.map(r => r.dimId)).size;
-  document.getElementById('progress-count').textContent = `${submitted} / ${DIMENSIONS.length}`;
-  document.getElementById('progress-fill').style.width = `${(submitted / DIMENSIONS.length) * 100}%`;
+async function updateProgress() {
+  const all = await getResponses();
+  updateProgressFrom(all);
 }
 
-function updateRagIndicators() {
-  const responses = getResponses();
-  DIMENSIONS.forEach(d => {
-    const dimResponses = responses.filter(r => r.dimId === d.id);
-    const navEl = document.getElementById(`nav-rag-${d.id}`);
-    const cardEl = document.getElementById(`card-rag-${d.id}`);
-    if (dimResponses.length > 0) {
-      const last = dimResponses[dimResponses.length - 1].rag;
-      [navEl, cardEl].forEach(el => { if (el) { el.className = `nav-rag ${last}`; } });
-    }
-  });
+async function updateRagIndicators() {
+  const all = await getResponses();
+  updateRagFrom(all);
 }
 
-function buildResultsPanel() {
-  const responses = getResponses();
-  const statRed = responses.filter(r => r.rag === 'red').length;
-  const statAmber = responses.filter(r => r.rag === 'amber').length;
-  const statGreen = responses.filter(r => r.rag === 'green').length;
-
-  document.getElementById('stat-red').textContent = statRed;
-  document.getElementById('stat-amber').textContent = statAmber;
-  document.getElementById('stat-green').textContent = statGreen;
-
+async function buildResultsPanel() {
+  const responses = await getResponses();
+  document.getElementById('stat-red').textContent = responses.filter(r => r.rag === 'red').length;
+  document.getElementById('stat-amber').textContent = responses.filter(r => r.rag === 'amber').length;
+  document.getElementById('stat-green').textContent = responses.filter(r => r.rag === 'green').length;
   const list = document.getElementById('results-list');
-  if (responses.length === 0) {
-    list.innerHTML = '<div class="empty">No responses submitted yet. Responses will appear here as people submit their input.</div>';
-    return;
-  }
-
+  if (!responses.length) { list.innerHTML = '<div class="empty">No responses submitted yet.</div>'; return; }
   list.innerHTML = DIMENSIONS.map(d => {
-    const dimR = responses.filter(r => r.dimId === d.id);
+    const dimR = responses.filter(r => (r.dim_id || r.dimId) === d.id);
     const dots = dimR.map(r => `<div class="mini-dot ${r.rag}"></div>`).join('');
-    return `
-      <div class="result-row" onclick="showDim(${d.id})">
-        <span class="result-row-num">${d.id}</span>
-        <span class="result-row-name">${d.title}</span>
-        <span class="result-row-count">${dimR.length} ${dimR.length === 1 ? 'response' : 'responses'}</span>
-        <div class="result-row-rag">${dots || '<div class="mini-dot none"></div>'}</div>
-      </div>
-    `;
+    return `<div class="result-row" onclick="showDim(${d.id})"><span class="result-row-num">${d.id}</span><span class="result-row-name">${d.title}</span><span class="result-row-count">${dimR.length} ${dimR.length === 1 ? 'response' : 'responses'}</span><div class="result-row-rag">${dots || '<div class="mini-dot none"></div>'}</div></div>`;
   }).join('');
 }
 
@@ -1280,8 +1284,7 @@ buildSidebar();
 buildOverviewGrid();
 buildDimPanels();
 refreshAllResponses();
-updateProgress();
-updateRagIndicators();
+setInterval(refreshAllResponses, 15000);
 </script>
 </body>
 </html>
